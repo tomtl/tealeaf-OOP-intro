@@ -1,6 +1,3 @@
-# board class
-# user class
-# computer class
 
 class Board
   attr_reader :positions
@@ -38,6 +35,12 @@ class Board
     positions.available.include?(position)
   end
   
+  def check_for_winner
+    # check if anyone won
+    # check if tie
+    # return winner (person/computer), tie or nil
+  end
+  
 end
 
 class Player
@@ -56,10 +59,13 @@ class Person < Player
       user_pick = gets.chomp
     end
     return user_pick
-  end # returns a board[value] like '1'
+  end 
 end
 
 class Computer < Player
+  def pick
+    # pick a good position
+  end
 end
 
 class TicTacToe
@@ -70,13 +76,25 @@ class TicTacToe
     @board = Board.new
   end
   
+  def win_message(winner)
+    case winner
+      when "Person" then "You win!"
+      when "Computer" then "You lose."
+      when nil then "It's a draw."
+    end
+  end
+  
   def run
-    until end_game
+    turn_count = 0
+    until winner
       Board.draw
       Person.ask_for_pick
+      turn_count += 1
+      break if Board.check_for_winner
       Computer.pick
-      Board.check_for_winner
+      winner = Board.check_for_winner
     end
+    puts win_message(winner)
   end
 end
   
