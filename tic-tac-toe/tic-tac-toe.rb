@@ -38,13 +38,13 @@ class Board
   end
   
   def available?(position)
-    positions.available.include?(position)
+    board.available.include?(position)
   end
   
-  def check_for_winner
-    player_positions = get_user_positions(board) if player == "user"
-    player_positions = get_computer_positions(board) if player == "computer"
-    winning_combinations.each do |combination|
+  def check_for_winner(player)
+    person_positions = person.positions
+    computer_positions = computer.positions
+    WINNING_COMBINATIONS.each do |combination|
       if (combination & player_positions) == combination
         return true
       end
@@ -55,30 +55,33 @@ class Board
 end
 
 class Player
-  attr_reader :name
-  def initialize(name)
-    @name = name
+  def initialize
+    puts "Player initialized."
+  end
+
+  def positions
+    player_pieces = {"Person" => "X", "Computer" => "o"}
+    player_positions = []
+    board.each do |position, value|
+      player_positions << position if value == player_pieces[name]
+    end
+    player_positions
   end
 end
+
 
 class Person < Player
   def ask_for_pick
     puts "=> Where do you want to go next?"
-    user_pick = gets.chomp
-    until positions.available?(user_pick.to_i)
+    user_pick = gets.chomp.to_i
+    until Board.available?(user_pick)
       puts "=> Thats not a valid entry. Please enter a number for an available spot."
-      user_pick = gets.chomp
+      user_pick = gets.chomp.to_i
     end
     return user_pick
-  end
-  
-  def positions
-    player_positions = []
-    board.each { |position, value| player_positions << position if value == "X" }
-    user_positions
-  end
-  
+  end  
 end
+
 
 class Computer < Player
   def pick
@@ -86,8 +89,9 @@ class Computer < Player
   end
 end
 
+
 class Game
-  attr_accessor :player, :computer, :board
+  attr_accessor :person, :computer, :board
   
   def initialize
     @person = Person.new
@@ -105,15 +109,16 @@ class Game
   
   def run
     turn_count = 0
-    until winner
-      Board.draw
-      Person.ask_for_pick
+    begin
+      board.draw
+      person.ask_for_pick
       turn_count += 1
-      break if Board.check_for_winner
-      Computer.pick
-      winner = Board.check_for_winner
-    end
+      break if board.check_for_winner(@person)
+      computer.pick
+      winner = board.check_for_winner(@computer)
+    end until winner
     puts win_message(winner)
   end
 end
   
+Game.new.run
