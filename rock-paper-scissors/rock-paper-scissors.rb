@@ -3,8 +3,8 @@ class Hand
   
   attr_reader :value
   
-  def initialize(v)
-    @value = v
+  def initialize(value)
+    @value = value
   end
 
   def <=>(another_hand)
@@ -34,8 +34,8 @@ class Player
   attr_accessor :hand
   attr_reader :name
   
-  def initialize(n)
-    @name = n
+  def initialize(name)
+    @name = name
   end
   
   def to_s
@@ -48,17 +48,17 @@ class Human < Player
   def pick_hand
     begin
       puts "Pick one: (p, r, s):"
-      c = gets.chomp.downcase
-    end until Game::CHOICES.keys.include?(c)
+      pick = gets.chomp.downcase
+    end until Game::CHOICES.keys.include?(pick)
     
-    self.hand = Hand.new(c)
+    @hand = Hand.new(pick)
   end
 end
 
 
 class Computer < Player
   def pick_hand
-    self.hand = Hand.new(Game::CHOICES.keys.sample)
+    @hand = Hand.new(Game::CHOICES.keys.sample)
   end
 end
 
@@ -97,7 +97,7 @@ class Game
       puts "Thats not a valid entry. Please type 'y' or 'n'."
       play_again = gets.chomp.downcase
     end
-    return play_again
+    play_again
   end
   
   def display_exit_message
@@ -112,9 +112,8 @@ class Game
       puts player
       puts computer
       compare_hands
-      # play_again = ask_play_again
     end while ask_play_again == 'y'
-  display_exit_message
+    display_exit_message
   end
 end
 
