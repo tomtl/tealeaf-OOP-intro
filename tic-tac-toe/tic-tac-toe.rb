@@ -112,8 +112,12 @@ class Game
     possible_win_combos.each { |combo| combo_lengths << combo.length }
       
     best_combos = []
-    possible_win_combos.each do |combo| 
-      best_combos << combo if combo.length == combo_lengths.min
+    if possible_win_combos.empty?
+      best_combos << @board.available.sample 
+    else
+      possible_win_combos.each do |combo| 
+        best_combos << combo if combo.length == combo_lengths.min
+      end
     end
       
     best_combos.sample.sample
