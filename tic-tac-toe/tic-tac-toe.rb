@@ -79,14 +79,44 @@ class Game
 
   def current_player_turn
     if @current_player == @person
-      begin
-        puts "=> Pick a position (1-9):"
-        pick = gets.chomp
-      end until @board.available?(pick.to_i)
+      pick = player_pick
     elsif @current_player == @computer
-      pick = board.available.sample
+      pick = computer_pick   
     end
     @board.update(pick, @current_player.marker)
+  end
+
+  def player_pick
+    begin
+      puts "=> Pick a position (1-9):"
+      pick = gets.chomp
+    end until @board.available?(pick.to_i)
+    pick
+  end
+
+  def computer_pick
+    person_positions = @board.player_picks(@person.marker)
+    computer_positions = @board.player_picks(@computer.marker)
+      
+    needed_for_win = []
+    Board::WINNING_COMBINATIONS.each do |combo| 
+      needed_for_win << (combo - computer_positions)
+    end
+      
+    possible_win_combos = []
+    needed_for_win.each do |combo| 
+      possible_win_combos << combo if (combo & person_positions).empty?
+    end
+      
+    combo_lengths = []
+    possible_win_combos.each { |combo| combo_lengths << combo.length }
+      
+    best_combos = []
+    possible_win_combos.each do |combo| 
+      best_combos << combo if combo.length == combo_lengths.min
+    end
+      
+    best_combos.sample.sample
   end
 
   def increment_turn_count
