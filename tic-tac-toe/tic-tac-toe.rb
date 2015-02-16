@@ -94,33 +94,49 @@ class Game
     pick
   end
 
-  def computer_pick
-    person_positions = @board.player_picks(@person.marker)
-    computer_positions = @board.player_picks(@computer.marker)
-      
-    needed_for_win = []
+  def potential_winning_combinations
+    # from winning combinations, subtract positions already picked by computer
+    win_combos_minus_computer_picks = []
     Board::WINNING_COMBINATIONS.each do |combo| 
-      needed_for_win << (combo - computer_positions)
+      win_combos_minus_computer_picks << (combo - @board.player_picks(@computer.marker))
     end
-      
-    possible_win_combos = []
-    needed_for_win.each do |combo| 
-      possible_win_combos << combo if (combo & person_positions).empty?
+    win_combos_minus_computer_picks # array of arrays
+  end
+
+  def available_winning_combinations
+    # subtract combinations blocked by person
+    win_combos_minus_computer_picks = potential_winning_combinations
+    available_win_combos = []
+    win_combos_minus_computer_picks.each do |combo| 
+      available_win_combos << combo if (combo & @board.player_picks(@person.marker)).empty?
     end
-      
+    available_win_combos # array of arrays
+  end
+
+  def winning_combination_lengths
+    # lengths of available combinations
+    available_winning_combos = available_winning_combinations  
     combo_lengths = []
-    possible_win_combos.each { |combo| combo_lengths << combo.length }
-      
+    available_winning_combos.each { |combo| combo_lengths << combo.length }
+    combo_lengths # array of integers
+  end
+
+  def best_winning_combinations
+    available_win_combos = available_winning_combinations
+    combo_lengths = winning_combination_lengths  
     best_combos = []
-    if possible_win_combos.empty?
-      best_combos << @board.available.sample 
-    else
-      possible_win_combos.each do |combo| 
-        best_combos << combo if combo.length == combo_lengths.min
-      end
+    available_win_combos.each do |combo| 
+      best_combos << combo if combo.length == combo_lengths.min
     end
-      
-    best_combos.sample.sample
+    best_combos # array of arrays
+  end
+
+  def computer_pick
+    if best_winning_combinations.empty?
+      @board.available.sample
+    else
+      best_winning_combinations.sample.sample
+    end
   end
 
   def increment_turn_count
@@ -141,6 +157,12 @@ class Game
 
   def short_pause
     sleep(1)
+  end
+
+  def display_board
+    short_pause
+    clear_screen
+    board.draw
   end
 
   def welcome_message
@@ -172,16 +194,13 @@ class Game
     puts welcome_message
     randomize_starting_player
     begin
-      short_pause
-      clear_screen
-      board.draw
+      display_board
       current_player_turn
       increment_turn_count
       winner = board.check_for_winner(@current_player.marker)
       alternate_player
     end until winner || @turn_count >= 9
-    system "cls"
-    board.draw
+    display_board
     puts win_message(winner)
     puts "Thanks for playing!"
   end
