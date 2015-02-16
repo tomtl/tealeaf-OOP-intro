@@ -1,4 +1,4 @@
-# blakcjack-oo.rb
+# blackjack-oo.rb
 
 # Tealeaf course 1, lesson 2
 # Tom Lee, Feb 16, 2014
@@ -200,9 +200,9 @@ class Game
   end
 
   def check_for_blackjack
-    if @person.score == 21
+    if person.score == 21
       puts "21, you win!"
-    elsif @computer.score == 21
+    elsif computer.score == 21
       puts "Dealer got 21!"
     end
   end
