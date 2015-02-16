@@ -52,18 +52,52 @@
 class Deck
   attr_accessor :cards
 
+  RANKS = [2, 3, 4, 5, 6, 7, 8, 9, "J", "Q", "K", "A"]
+  SUITS = ["C", "D", "H", "S"]
+  VALUES = { 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9,
+            "J" => 10, "Q" => 10, "K" => 10, "A" => 11 }
+
   def initialize
-    @cards = []
+    @card = build_deck
   end
+
+  def build_deck
+    @cards = []
+
+    2.times do
+      RANKS.each do |rank|
+        SUITS.each do |suit|
+          @cards << Card.new(rank, suit)
+        end
+      end
+    end
+  end
+
+  def deal
+    @cards.pop(10)
+  end
+
+  def shuffle
+    @cards.shuffle
+  end
+
+  def deal
+    @cards.shuffle.pop
+  end
+
 end
 
 class Card
-  attr_reader :rank, :suit, :value
+  attr_accessor :rank, :suit, :value
 
-  def initialize (rank, suit, value)
+  def initialize (rank, suit)
     @rank = rank
     @suit = suit
-    @value = value
+    @value = Deck::VALUES[rank]
+  end
+
+  def to_s
+    "#{rank}#{suit}"
   end
 end
 
@@ -73,4 +107,40 @@ class Player
   def initialize
     @hand = []
   end
+
+  def add_card_to_hand(card)
+    hand << card
+  end
+
+  def to_s
+    "#{@hand}"
+  end
+
 end
+
+class Game
+  attr_reader :deck, :person , :computer
+
+  def initialize
+    @deck = Deck.new
+    @person = Player.new
+    @computer = Player.new
+  end
+
+  def deal_initial_cards
+    2.times do
+      person.add_card_to_hand(deck.deal)
+      computer.add_card_to_hand(deck.deal)
+    end
+  end
+
+  def run
+    deal_initial_cards
+    p person.hand
+    p computer.hand
+  end
+
+end
+
+Game.new.run
+
