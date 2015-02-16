@@ -74,15 +74,15 @@ class Deck
   end
 
   def deal
-    @cards.pop(10)
+    cards.pop(10)
   end
 
   def shuffle
-    @cards.shuffle
+    cards.shuffle
   end
 
   def deal
-    @cards.shuffle.pop
+    cards.shuffle.pop
   end
 
 end
@@ -102,14 +102,48 @@ class Card
 end
 
 class Player
-  attr_accessor :hand
+  attr_accessor :hand, :score
 
   def initialize
     @hand = []
+    @score = 0
   end
 
   def add_card_to_hand(card)
     hand << card
+    update_player_score
+  end
+
+  def update_player_score
+    if score > 21 && hand.aces_count > 0
+      calculate_hand_value_with_aces
+    else
+      @score = 0
+      hand.each { |card| @score += card.value }
+    end
+    score
+  end
+
+  def calculate_hand_value_with_aces
+    ace_cards_count = hand.aces_count
+    ace_cards_value = ace_cards_count * 11
+    while ace_cards.count > 0
+      ace_cards_count -= 1
+      ace_cards_value -= 10
+      value = non_ace_cards_value + ace_cards_value
+      break if value <= 21
+    end
+    @score = value
+  end
+
+  def aces_count
+    hand.select { |card| card.rank == "A" }.count
+  end
+
+  def non_aces_value
+    non_ace_cards = hand.select { |card| card.rank != "A" }
+    non_ace_cards_value = 0
+    non_ace_cards.each { |card| non_ace_cards_value += card.value}
   end
 
   def to_s
@@ -138,6 +172,7 @@ class Game
     deal_initial_cards
     p person.hand
     p computer.hand
+    p @person.score
   end
 
 end
