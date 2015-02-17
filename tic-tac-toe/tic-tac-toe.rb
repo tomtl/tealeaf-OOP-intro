@@ -27,15 +27,15 @@ class Board
   end
   
   def available
-    @positions.select { |key, value| value != "X" && value != "o" }.keys
+    positions.select { |key, value| value != "X" && value != "o" }.keys
   end
   
   def available?(position)
-    @positions.select { |key, value| value != "X" && value != "o" }.keys.include?(position)
+    positions.select { |key, value| value != "X" && value != "o" }.keys.include?(position)
   end
 
   def player_picks(marker)
-    @positions.select { |_, value| value == marker}.keys
+    positions.select { |_, value| value == marker}.keys
   end
   
   def check_for_winner(marker)
@@ -57,7 +57,7 @@ class Player
   end
 
   def picks
-    @board.player_picks(@marker)
+    board.player_picks(marker)
   end
 end
 
@@ -74,16 +74,16 @@ class Game
   
   def randomize_starting_player
     @current_player = [@person, @computer].sample
-    puts @current_player == @person ? "You are first." : "Computer went first."
+    puts current_player == person ? "You are first." : "Computer went first."
   end
 
   def current_player_turn
-    if @current_player == @person
+    if current_player == person
       pick = player_pick
-    elsif @current_player == @computer
+    elsif current_player == computer
       pick = computer_pick   
     end
-    @board.update(pick, @current_player.marker)
+    @board.update(pick, current_player.marker)
   end
 
   def player_pick
@@ -98,7 +98,7 @@ class Game
     # from winning combinations, subtract positions already picked by computer
     win_combos_minus_computer_picks = []
     Board::WINNING_COMBINATIONS.each do |combo| 
-      win_combos_minus_computer_picks << (combo - @board.player_picks(@computer.marker))
+      win_combos_minus_computer_picks << (combo - board.player_picks(computer.marker))
     end
     win_combos_minus_computer_picks # array of arrays
   end
@@ -108,7 +108,7 @@ class Game
     win_combos_minus_computer_picks = potential_winning_combinations
     available_win_combos = []
     win_combos_minus_computer_picks.each do |combo| 
-      available_win_combos << combo if (combo & @board.player_picks(@person.marker)).empty?
+      available_win_combos << combo if (combo & board.player_picks(person.marker)).empty?
     end
     available_win_combos # array of arrays
   end
@@ -133,7 +133,7 @@ class Game
 
   def computer_pick
     if best_winning_combinations.empty?
-      @board.available.sample
+      board.available.sample
     else
       best_winning_combinations.sample.sample
     end
@@ -144,7 +144,7 @@ class Game
   end
 
   def alternate_player
-    if @current_player == @person
+    if current_player == person
       @current_player = @computer
     else
       @current_player = @person
@@ -153,6 +153,7 @@ class Game
 
   def clear_screen
     system "cls"
+    system "clear"
   end
 
   def short_pause
@@ -170,11 +171,11 @@ class Game
   end
 
   def win_message(marker)
-    if @turn_count >= 9
+    if turn_count >= 9
       "It's a tie"
-    elsif marker == @person.marker
+    elsif marker == person.marker
       "You win!"
-    elsif marker == @computer.marker
+    elsif marker == computer.marker
       "You lose."
     end
   end
@@ -197,9 +198,9 @@ class Game
       display_board
       current_player_turn
       increment_turn_count
-      winner = board.check_for_winner(@current_player.marker)
+      winner = board.check_for_winner(current_player.marker)
       alternate_player
-    end until winner || @turn_count >= 9
+    end until winner || turn_count >= 9
     display_board
     puts win_message(winner)
     puts "Thanks for playing!"
