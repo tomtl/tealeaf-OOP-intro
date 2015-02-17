@@ -270,6 +270,39 @@ class Game
     puts "Dealer stays on #{computer.score}"
   end
 
+  def ask_play_again
+    puts ""
+    puts "Do you want to play again? (y/n)"
+    play_again = gets.chomp.downcase
+  end
+
+  def play_again
+    play_again = ask_play_again
+    begin
+      if play_again == 'y'
+        start_new_game
+      elsif play_again == 'n'
+        exit_game
+      else
+        play_again = ask_play_again
+      end
+    end while ['y', 'n'].include?(play_again)
+  end
+
+  def start_new_game
+    @deck = Deck.new
+    @person.hand = []
+    @person.score = 0
+    @computer.hand = []
+    @computer.score = 0
+    run
+  end
+
+  def exit_game
+    display_endgame_message
+    exit
+  end
+
   def run
     clear_screen
     display_welcome_message
@@ -278,7 +311,7 @@ class Game
     player_turn
     dealer_turn
     display_winner
-    display_endgame_message
+    play_again
   end
 end
 
