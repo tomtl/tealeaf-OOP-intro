@@ -63,12 +63,11 @@ class Deck
             "Jack" => 10, "Queen" => 10, "King" => 10, "Ace" => 11 }
 
   def initialize
-    @card = build_deck
+    @cards = []
+    build_deck
   end
 
   def build_deck
-    @cards = []
-
     2.times do
       RANKS.each do |rank|
         SUITS.each do |suit|
@@ -79,17 +78,8 @@ class Deck
   end
 
   def deal
-    cards.pop(10)
+    cards.shuffle!.pop
   end
-
-  def shuffle
-    cards.shuffle
-  end
-
-  def deal
-    cards.shuffle.pop
-  end
-
 end
 
 class Card
@@ -123,8 +113,7 @@ class Player
     if score > 21 && aces_count > 0
       calculate_hand_value_with_aces
     else
-      @score = 0
-      hand.each { |card| @score += card.value }
+      calculate_hand_value_without_aces
     end
     score
   end
@@ -139,6 +128,12 @@ class Player
       break if value <= 21
     end
     @score = value
+  end
+
+  def calculate_hand_value_without_aces
+    @score = 0
+    hand.each { |card| @score += card.value }
+    score
   end
 
   def aces_count
@@ -167,11 +162,13 @@ class Game
     @computer = Player.new
   end
 
-  def deal_initial_cards
-    2.times do
-      person.add_card_to_hand(deck.deal)
-      computer.add_card_to_hand(deck.deal)
-    end
+  def clear_screen
+    system "cls"
+    system "clear"
+  end
+
+  def display_welcome_message
+    puts "Welcome to Blackjack!"
   end
 
   def display_initial_cards
@@ -183,11 +180,32 @@ class Game
     puts "Your cards are: #{person.hand}. Score: #{person.score}"
     puts "Dealer's cards are: #{computer.hand}. Score: #{computer.score}"
   end
+
+  def display_player_turn_message
+    puts ""
+    puts " -Your turn-"
+  end
+
+  def display_computer_turn_message
+    puts ""
+    puts " -Dealer's turn- "
+  end
     
+  def display_dealt_card(player)
+    sleep(0.5)
+    if player == @computer
+      puts "Dealer received a #{@computer.hand.last}."
+    else
+      puts "You received a #{@person.hand.last}."
+    end
+  end
+
   def display_winner
+    puts ""
+    puts " -Final score-"
     display_all_cards
     if person.score > 21
-      puts "#{person.score} - You busted, you lose."
+      puts "You have #{person.score} - Bust. You lose."
     elsif computer.score > 21
       puts "Dealer busted, you win!"
     elsif person.score > computer.score
@@ -199,6 +217,18 @@ class Game
     end      
   end
 
+  def display_endgame_message
+    puts ""
+    puts "Thanks for playing!"
+  end
+
+  def deal_initial_cards
+    2.times do
+      person.add_card_to_hand(deck.deal)
+      computer.add_card_to_hand(deck.deal)
+    end
+  end
+
   def check_for_blackjack
     if person.score == 21
       puts "21, you win!"
@@ -207,32 +237,48 @@ class Game
     end
   end
 
+  def ask_player_to_hit
+    puts "Do you want to hit? (y/n)"
+    hit = gets.chomp
+    until ["y", "n"].include?(hit.downcase)
+      puts "Do you want another card? Please type 'y' or 'n'."
+      hit = gets.chomp
+    end
+    hit
+  end
+
   def player_turn
+    display_player_turn_message
     begin
+      display_initial_cards
       return nil if computer.score == 21
-      puts "Do you want to hit? (y/n)"
-      hit = gets.chomp.downcase
+      hit = ask_player_to_hit
       break if hit == "n"
       person.add_card_to_hand(deck.deal)
-      display_initial_cards
+      display_dealt_card(person)
     end while person.score <= 21
+    puts "You stay on #{person.score}"
   end
 
   def dealer_turn
+    display_computer_turn_message
     return nil if person.score > 21
     while computer.score < 17
       computer.add_card_to_hand(deck.deal)
-      display_all_cards
+      display_dealt_card(computer)
     end
+    puts "Dealer stays on #{computer.score}"
   end
 
   def run
+    clear_screen
+    display_welcome_message
     deal_initial_cards
-    display_initial_cards
     check_for_blackjack
     player_turn
     dealer_turn
     display_winner
+    display_endgame_message
   end
 end
 
