@@ -3,57 +3,6 @@
 # Tealeaf course 1, lesson 2
 # Tom Lee, Feb 16, 2014
 
-# Theres a player and a dealer. 
-# Dealer deals cards to player and self.
-# Player counts score and decides to hit or stay
-# If hit, dealer deals more cards until player stays or busts
-# If blackjack, player wins
-# On stay, dealer hits if less than 17
-# dealer stays when 17 or greater, dealer busts if over 21
-# Winner is the higher hand if not busted
-
-# classes
-# Player
-#   - @hand
-#   add card to hand
-
-# Deck
-#   - @Remaining cards
-#   Shuffle
-#   deal card
-
-# Card
-#   @rank
-#   @suit
-#   @value
-
-# Game
-#   deal cards
-#   calculate hand score
-#     with Ace compensation
-#   win condition (blackjack)
-#   bust condition
-#   hit (deal one card)
-#   who is Winner
-
-
-# Flow
-#   Deal cards
-#   calculate hand score
-#   win/bust condition
-#   player turn
-#     ask hit/stay
-#     if hit
-#       deal card
-#       check for bust
-#       ask hit again
-#   dealer turn
-#     if < 17
-#       deal card
-#       check for bust
-#       loop until >=17
-#   who won
-
 class Deck
   attr_accessor :cards
 
@@ -77,7 +26,7 @@ class Deck
     end
   end
 
-  def deal
+  def deal_one_card
     cards.shuffle!.pop
   end
 end
@@ -222,10 +171,17 @@ class Game
     puts "Thanks for playing!"
   end
 
+  def deal_to(player)
+    if player == person
+      person.add_card_to_hand(deck.deal_one_card)
+    else
+      computer.add_card_to_hand(deck.deal_one_card)
+    end
+  end
+
   def deal_initial_cards
     2.times do
-      person.add_card_to_hand(deck.deal)
-      computer.add_card_to_hand(deck.deal)
+      [person, computer].each { |player| deal_to(player) }
     end
   end
 
@@ -254,7 +210,7 @@ class Game
       return nil if computer.score == 21
       hit = ask_player_to_hit
       break if hit == "n"
-      person.add_card_to_hand(deck.deal)
+      deal_to(person)
       display_dealt_card(person)
     end while person.score <= 21
     puts "You stay on #{person.score}"
@@ -264,7 +220,7 @@ class Game
     display_computer_turn_message
     return nil if person.score > 21
     while computer.score < 17
-      computer.add_card_to_hand(deck.deal)
+      deal_to(computer)
       display_dealt_card(computer)
     end
     puts "Dealer stays on #{computer.score}"
